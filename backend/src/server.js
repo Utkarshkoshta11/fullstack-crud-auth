@@ -1,10 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import cluster from "cluster";
 import os from "os";
-import dotenv from "dotenv";
 import app from "./app.js";
 import { connectDB } from "./config/db.js";
-
-dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === "production";

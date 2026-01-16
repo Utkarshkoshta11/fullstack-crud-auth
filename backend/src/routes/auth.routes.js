@@ -50,22 +50,28 @@ router.post("/login", async (req, res) => {
     }
 
     if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET not configured");
+      return res
+        .status(500)
+        .json({ message: "Authentication service unavailable" });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
+    const isProd = process.env.NODE_ENV === "production";
+
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
     });
 
     res.status(200).json({ message: "Logged in successfully" });
   } catch (error) {
-    console.error("Login error:", error);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Login error:", error);
+    }
     res.status(500).json({ message: "Internal server error" });
   }
 });
