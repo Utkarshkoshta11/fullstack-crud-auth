@@ -81,6 +81,7 @@ PORT=5000
 MONGO_URI=mongodb://localhost:27017/fullstack-crud
 JWT_SECRET=your_secret_key
 NODE_ENV=development
+CLIENT_URL=http://localhost:3000
 
 Frontend (frontend/.env.local)
 NEXT_PUBLIC_API_URL=http://localhost:5000
