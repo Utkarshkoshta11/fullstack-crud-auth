@@ -1,39 +1,44 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-console.log("API_URL at runtime:", API_URL);
-
 if (!API_URL) {
   throw new Error("NEXT_PUBLIC_API_URL is not defined");
 }
 
 type ApiOptions = RequestInit & {
-  auth?: boolean;
+  auth?: boolean; // semantic flag
 };
 
-export async function apiFetch(
+type ApiError = {
+  message?: string;
+};
+
+export async function apiFetch<T = any>(
   path: string,
   options: ApiOptions = {}
-) {
+): Promise<T> {
   const { auth = false, ...fetchOptions } = options;
-
-  console.log("➡️ apiFetch called");
-  console.log("➡️ URL:", `${API_URL}${path}`);
-  console.log("➡️ auth:", auth);
-  console.log("➡️ fetchOptions:", fetchOptions);
 
   const res = await fetch(`${API_URL}${path}`, {
     ...fetchOptions,
-    credentials: "include",
+    credentials: "include", // REQUIRED for cookie-based JWT
     headers: {
       "Content-Type": "application/json",
-      ...(fetchOptions.headers || {})
-    }
+      ...(fetchOptions.headers || {}),
+    },
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    console.error("❌ API error response:", text);
-    throw new Error(text || "API request failed");
+    let errorMessage = "API request failed";
+
+    try {
+      const data: ApiError = await res.json();
+      if (data?.message) errorMessage = data.message;
+    } catch {
+      // fallback if response is not JSON
+      errorMessage = await res.text();
+    }
+
+    throw new Error(errorMessage);
   }
 
   return res.json();

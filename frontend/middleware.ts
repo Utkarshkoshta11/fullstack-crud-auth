@@ -7,4 +7,13 @@ export function middleware(req: NextRequest) {
   if (!token && req.nextUrl.pathname.startsWith("/products")) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
-}
+
+  return NextResponse.next();
+};
+
+/**
+ * Limit middleware execution to protected routes
+ */
+export const config = {
+  matcher: ["/products/:path*"],
+};

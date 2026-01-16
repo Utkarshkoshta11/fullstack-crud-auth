@@ -26,4 +26,9 @@ describe("Database Connection", () => {
     await mongoServer.stop();
     process.env.MONGO_URI = originalMongoUri;
   });
+  it("handles DB connection failure", async () => {
+    process.env.MONGO_URI = "invalid-uri";
+
+    await expect(connectDB()).rejects.toBeDefined();
+  });
 });

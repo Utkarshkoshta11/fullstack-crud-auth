@@ -1,47 +1,81 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useState } from "react";
 import { apiFetch } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
+
     const form = e.currentTarget;
+    const data = new FormData(form);
+    const username = data.get("username") as string;
+    const password = data.get("password") as string;
 
-    await apiFetch("/api/auth/login", {
-      method: "POST",
-      auth: true, // ✅ REQUIRED
-      body: JSON.stringify({
-        username: (form as any).username.value,
-        password: (form as any).password.value
-      })
-    });
+    try {
+      await apiFetch("/api/auth/login", {
+        method: "POST",
+        auth: true,
+        body: JSON.stringify({ username, password }),
+      });
 
-    router.push("/products");
+      router.push("/products");
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <form onSubmit={handleLogin} className="p-8 space-y-4">
-      <h1 className="text-xl font-bold">Login</h1>
+    <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white shadow-md rounded-lg p-8 w-full max-w-md space-y-4"
+        data-testid="login-form"
+      >
+        <h1 className="text-2xl font-bold text-center">Login</h1>
 
-      <input
-        name="username"
-        placeholder="Username"
-        className="border p-2 block"
-      />
+        {error && <p className="text-red-600 text-sm text-center">{error}</p>}
 
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        className="border p-2 block"
-      />
+        <input
+          name="username"
+          placeholder="Username"
+          required
+          className="border p-2 w-full rounded"
+        />
 
-      <button className="bg-black text-white px-4 py-2">
-        Login
-      </button>
-    </form>
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          required
+          className="border p-2 w-full rounded"
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-black text-white w-full py-2 rounded disabled:opacity-50"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        <p className="text-sm text-center">
+          New user?{" "}
+          <Link href="/register" className="text-blue-600 underline">
+            Register here
+          </Link>
+        </p>
+      </form>
+    </main>
   );
 }
