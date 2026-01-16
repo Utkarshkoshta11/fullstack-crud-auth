@@ -1,0 +1,19 @@
+# dependencies
+**/node_modules/
+
+# env files
+**/.env
+**/.env.*
+
+# next
+**/.next/
+**/out/
+
+# coverage
+**/coverage/
+
+# logs
+*.log
+
+# os
+.DS_Store
